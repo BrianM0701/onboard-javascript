@@ -6,11 +6,12 @@
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"module": "es2015",
-		"moduleResolution": "node",
-		"target": "es5",
+		"moduleResolution": "bundler",
+		"target": "es2016",
 		"typeRoots": [
 			"./node_modules/@types"
 		],
+		"types": ["jquery"],
 		"lib": [
 			"dom",
 			"es2016"

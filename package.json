@@ -1,0 +1,26 @@
+{
+  "name": "onboard-javascript",
+  "version": "1.0.0",
+  "description": "This is a JavaScript project for all new developers to complete before venturing into our web frontend codebase.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrianM0701/onboard-javascript.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BrianM0701/onboard-javascript/issues"
+  },
+  "homepage": "https://github.com/BrianM0701/onboard-javascript#readme",
+  "devDependencies": {
+    "@types/jquery": "^4.0.1",
+    "typescript": "^6.0.3"
+  }
+}
