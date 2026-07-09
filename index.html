@@ -61,7 +61,7 @@
     #data-table tbody {
         flex: 1 1 auto;
         display: block;
-        overflow-y: auto;
+        overflow-y: visible;
         width: 100%;
         min-height: 0;
     }
@@ -168,12 +168,14 @@
 <body>
     <div id="grid-container">
         <div id="loading">Loading data…</div>
-        <table id="data-table">
-            <thead id="table-head">
-            </thead>
-            <tbody id="table-body">
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+          <table id="data-table">
+              <thead id="table-head">
+              </thead>
+              <tbody id="table-body">
+              </tbody>
+          </table>
+        </div>
         <div id="pagination">
             <button id="prev-btn">Previous</button>
             <span id="page-info">Page 0 of 0</span>
