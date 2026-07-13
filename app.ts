@@ -87,7 +87,7 @@ function renderPaginationInfo() {
 
     $pageInfo.text(
         `Page ${currentPage + 1} of ${totalPages} ` +
-        `(showing ${fromIndex} to ${toIndex} of ${totalRecords} records)`
+        `(showing ${fromIndex - 1} to ${toIndex - 1} of ${totalRecords} records)`
     );
 
     $prevBtn.prop('disabled', currentPage === 0);
