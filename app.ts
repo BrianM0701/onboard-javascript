@@ -67,8 +67,6 @@ function getPageStart(page: number): number {
     if (remainder === 0)
         return page * pageSize;
 
-    let overlap = pageSize - remainder;
-
     if (isForwardNavigation) {
         if (page === totalPages - 1)
             return Math.max(0, totalRecords - pageSize);
@@ -78,8 +76,12 @@ function getPageStart(page: number): number {
 
     if (page === 0)
         return 0;
+    else if (page === 1) {
+        let overlap = pageSize - remainder;
+        return Math.max(0, pageSize - overlap);
+    }
 
-	return Math.max(0, page * pageSize - overlap);
+    return page * pageSize;
 }
 
 function renderHeaders() {
