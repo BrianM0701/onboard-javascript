@@ -76,10 +76,6 @@ function getPageStart(page: number): number {
 
     if (page === 0)
         return 0;
-    // else if (page === 1) {
-    //     let overlap = pageSize - remainder;
-    //     return Math.max(0, pageSize - overlap);
-    // }
 
     return page * pageSize;
 }
