@@ -1,14 +1,13 @@
 const API_BASE = 'http://localhost:2050';
 
 let columns: string[] = [];
+let currentData: any[][] = [];
+
 let totalRecords = 0;
 let currentPage = 0;
+let currentStart = 0;
 let currentTopRecordIndex = 0;
-let currentData: any[][] = [];
-let pageSize = 5;
-
-let isForwardNavigation = true;
-let hasRemainder: boolean = false;
+let pageSize = 20;
 
 let $tableHead: JQuery<HTMLElement>;
 let $tableBody: JQuery<HTMLElement>;
@@ -60,31 +59,12 @@ async function fetchCurrentPageRecords(from: number, to: number): Promise<any[][
     return data;
 }
 
-function getPageStart(page: number): number {
-    let totalPages = Math.ceil(totalRecords / pageSize);
-    let remainder = totalRecords % pageSize;
-
-    if (remainder === 0)
-        return page * pageSize;
-
-    if (isForwardNavigation) {
-        if (page === totalPages - 1)
-            return Math.max(0, totalRecords - pageSize);
-
-        return page * pageSize;
-    }
-
-    if (page === 0)
-        return 0;
-
-    return page * pageSize;
-}
-
 function renderHeaders() {
     if (!Array.isArray(columns)) {
         console.error('Columns is not an array:', columns);
         return;
     }
+
     let html = '<tr>';
     for (let cell of columns)
         html += `<th>${cell}</th>`;
@@ -105,13 +85,12 @@ function renderBody(data: any[][]) {
 
 function renderPaginationInfo() {
     let totalPages = Math.ceil(totalRecords / pageSize);
-
-    let actualStart = getPageStart(currentPage);
-    let actualEnd = Math.min(actualStart + pageSize - 1, totalRecords - 1);
+    let fromIndex = currentStart;
+    let toIndex = Math.min(fromIndex + pageSize - 1, totalRecords - 1);
 
     $pageInfo.text(
         `Page ${currentPage + 1} of ${totalPages} ` +
-        `(showing ${actualStart} to ${actualEnd} of ${totalRecords} records)`
+        `(showing ${fromIndex} to ${toIndex} of ${totalRecords} records)`
     );
 
     $prevBtn.prop('disabled', currentPage === 0);
@@ -127,12 +106,17 @@ async function loadPage(page: number, updateAnchor: boolean = true) {
     else if (page < 0)
         page = 0;
 
-    let from = getPageStart(page);
+	let lastPageStart = Math.max(0, totalRecords - pageSize);
+    if (currentStart < 0) currentStart = 0;
+    if (currentStart > lastPageStart) currentStart = lastPageStart;
+
+    let from = currentStart;
     let to = Math.min(from + pageSize - 1, totalRecords - 1);
 
     if (from > to) {
-        from = 0;
-        to = Math.min(pageSize - 1, totalRecords - 1);
+        from = page * pageSize;
+        to = Math.min(from + pageSize - 1, totalRecords - 1);
+        currentStart = from;
     }
 
     if (updateAnchor)
@@ -156,7 +140,7 @@ function findPageForRecord(recordIndex: number): number {
 
     while (low <= high) {
         let mid = Math.floor((low + high) / 2);
-        let start = getPageStart(mid);
+        let start = mid * pageSize;
         let end = Math.min(start + pageSize - 1, totalRecords - 1);
 
         if (recordIndex >= start && recordIndex <= end)
@@ -165,7 +149,6 @@ function findPageForRecord(recordIndex: number): number {
             high = mid - 1;
         else
             low = mid + 1;
-
     }
 
     let fallbackPage = Math.floor(recordIndex / pageSize);
@@ -176,10 +159,22 @@ async function handleResize() {
     let newSize = calculatePageSize();
     if (newSize !== pageSize) {
         pageSize = newSize;
-        hasRemainder = (totalRecords % pageSize) !== 0;
 
-        let page = findPageForRecord(currentTopRecordIndex);
-        await loadPage(page, false);
+        let newPage = findPageForRecord(currentTopRecordIndex);
+        let totalPages = Math.ceil(totalRecords / pageSize);
+
+		newPage = Math.min(newPage, totalPages - 1);
+
+		currentStart = newPage * pageSize;
+
+        let lastPageStart = Math.max(0, totalRecords - pageSize);
+        if (currentStart > lastPageStart) {
+            currentStart = lastPageStart;
+            newPage = Math.floor(currentStart / pageSize);
+        }
+
+        currentPage = newPage;
+        await loadPage(currentPage, false);
     }
 }
 
@@ -205,10 +200,10 @@ jQuery(async ($) => {
 
         renderHeaders();
         renderBody(sampleData);
-        pageSize = calculatePageSize();
-        hasRemainder = (totalRecords % pageSize) !== 0;
-        isForwardNavigation = true;
 
+        pageSize = calculatePageSize();
+
+        currentStart = 0;
         await loadPage(0, true);
 
         $prevBtn.on('click', async () => {
@@ -217,8 +212,9 @@ jQuery(async ($) => {
             $pageJump.prop('readonly', true);
 
             if (currentPage > 0) {
-                isForwardNavigation = false;
-                await loadPage(currentPage - 1, true);
+                currentStart -= pageSize;
+                if (currentStart < 0) currentStart = 0;
+                await loadPage(--currentPage, true);
             }
 
             $prevBtn.prop('disabled', currentPage === 0);
@@ -233,8 +229,13 @@ jQuery(async ($) => {
 
             let totalPages = Math.ceil(totalRecords / pageSize);
             if (currentPage < totalPages - 1) {
-                isForwardNavigation = true;
-                await loadPage(currentPage + 1, true);
+                currentStart += pageSize;
+
+				let lastPageStart = Math.max(0, totalRecords - pageSize);
+                if (currentStart > lastPageStart)
+                    currentStart = lastPageStart;
+
+                await loadPage(++currentPage, true);
             }
 
             $prevBtn.prop('disabled', currentPage === 0);
@@ -245,23 +246,23 @@ jQuery(async ($) => {
         $goBtn.on('click', jumpToPage);
 
         $pageJump.on('keypress', (e) => {
-            if (e.key === 'Enter')
-                jumpToPage();
+            if (e.key === 'Enter') jumpToPage();
         });
 
         function jumpToPage() {
             let val = parseInt($pageJump.val() as string, 10);
             let totalPages = Math.ceil(totalRecords / pageSize);
-
             if (!isNaN(val) && val >= 1 && val <= totalPages) {
                 let targetPage = val - 1;
                 if (targetPage !== currentPage) {
-                    if (targetPage > currentPage)
-                        isForwardNavigation = true;
-                    else if (targetPage < currentPage)
-                        isForwardNavigation = false;
+                    let jumpCounts = targetPage - currentPage;
+                    currentStart += pageSize * jumpCounts;
 
-					currentPage = targetPage;
+                    let lastPageStart = Math.max(0, totalRecords - pageSize);
+                    if (currentStart < 0) currentStart = 0;
+                    if (currentStart > lastPageStart) currentStart = lastPageStart;
+
+                    currentPage = targetPage;
                     loadPage(currentPage, true);
                 }
             } else {
