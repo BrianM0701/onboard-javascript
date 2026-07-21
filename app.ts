@@ -176,10 +176,8 @@ async function handleResize() {
 	let isOnLastPage = currentTopRecordIndex >= lastPageStart;
 
 	if (isOnLastPage) {
-        await loadPage(0, false, true);
-		let from = totalRecords - pageSize;
-		renderPaginationInfo(from, totalRecords - 1);
-		currentStart = from;
+        currentStart = totalRecords - pageSize;
+		await loadPage(0, false, true);
     }else {
         let newPage = findPageForRecord(currentTopRecordIndex);
         let totalPages = Math.ceil(totalRecords / pageSize);
