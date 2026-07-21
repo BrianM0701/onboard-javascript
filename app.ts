@@ -83,10 +83,10 @@ function renderBody(data: any[][]) {
     $tableBody.html(html);
 }
 
-function renderPaginationInfo() {
+function renderPaginationInfo(from: number = 0, to: number = 0) {
     let totalPages = Math.ceil(totalRecords / pageSize);
-    let fromIndex = currentStart;
-    let toIndex = Math.min(fromIndex + pageSize - 1, totalRecords - 1);
+    let fromIndex = from === 0 ? currentStart : from;
+    let toIndex = to === 0 ? Math.min(fromIndex + pageSize - 1, totalRecords - 1) : to;
 
     $pageInfo.text(
         `Page ${currentPage + 1} of ${totalPages} ` +
@@ -98,25 +98,33 @@ function renderPaginationInfo() {
     $pageJump.attr('max', totalPages);
 }
 
-async function loadPage(page: number, updateAnchor: boolean = true) {
+async function loadPage(page: number, updateAnchor: boolean = true, forceLastPage: boolean = false) {
     let totalPages = Math.ceil(totalRecords / pageSize);
+	let from: number;
+    let to: number;
 
     if (page >= totalPages)
         page = totalPages - 1;
     else if (page < 0)
         page = 0;
 
-	let lastPageStart = Math.max(0, totalRecords - pageSize);
-    if (currentStart < 0) currentStart = 0;
-    if (currentStart > lastPageStart) currentStart = lastPageStart;
-
-    let from = currentStart;
-    let to = Math.min(from + pageSize - 1, totalRecords - 1);
-
-    if (from > to) {
-        from = page * pageSize;
+    if (forceLastPage) {
+        from = Math.max(0, totalRecords - pageSize);
         to = Math.min(from + pageSize - 1, totalRecords - 1);
-        currentStart = from;
+        page = totalPages - 1;
+    } else {
+        let lastPageStart = Math.max(0, totalRecords - pageSize);
+        if (currentStart < 0) currentStart = 0;
+        if (currentStart > lastPageStart) currentStart = lastPageStart;
+
+        from = currentStart;
+        to = Math.min(from + pageSize - 1, totalRecords - 1);
+
+        if (from > to) {
+            from = page * pageSize;
+            to = Math.min(from + pageSize - 1, totalRecords - 1);
+            currentStart = from;
+        }
     }
 
     if (updateAnchor)
@@ -125,6 +133,8 @@ async function loadPage(page: number, updateAnchor: boolean = true) {
     let data = await fetchCurrentPageRecords(from, to);
     currentData = data;
     currentPage = page;
+
+	debugger;
 
     renderBody(data);
     renderPaginationInfo();
@@ -157,22 +167,24 @@ function findPageForRecord(recordIndex: number): number {
 
 async function handleResize() {
     let newSize = calculatePageSize();
-    if (newSize !== pageSize) {
-        pageSize = newSize;
 
+	if (newSize === pageSize) return;
+
+    pageSize = newSize;
+
+	let lastPageStart = totalRecords - pageSize;
+	let isOnLastPage = currentTopRecordIndex >= lastPageStart;
+
+	if (isOnLastPage) {
+        await loadPage(0, false, true);
+		let from = totalRecords - pageSize;
+		renderPaginationInfo(from, totalRecords - 1);
+		currentStart = from;
+    }else {
         let newPage = findPageForRecord(currentTopRecordIndex);
         let totalPages = Math.ceil(totalRecords / pageSize);
-
-		newPage = Math.min(newPage, totalPages - 1);
-
-		currentStart = newPage * pageSize;
-
-        let lastPageStart = Math.max(0, totalRecords - pageSize);
-        if (currentStart > lastPageStart) {
-            currentStart = lastPageStart;
-            newPage = Math.floor(currentStart / pageSize);
-        }
-
+        newPage = Math.min(newPage, totalPages - 1);
+        currentStart = newPage * pageSize;
         currentPage = newPage;
         await loadPage(currentPage, false);
     }
