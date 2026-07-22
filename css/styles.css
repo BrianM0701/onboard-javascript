@@ -1,0 +1,172 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f7fa;
+}
+
+#grid-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 10px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.table-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid #e0e4e8;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+#data-table {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#data-table thead {
+    flex: 0 0 auto;
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#data-table thead th {
+    background: #2c3e50;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 8px;
+    border: 1px solid #34495e;
+    text-align: left;
+}
+
+#data-table tbody {
+    flex: 1 1 auto;
+    display: block;
+    overflow-y: visible;
+    width: 100%;
+    min-height: 0;
+}
+
+#data-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#data-table tbody td {
+    padding: 10px 8px;
+    border: 1px solid #e0e4e8;
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    background: white;
+}
+
+#data-table tbody tr:nth-child(even) td {
+    background: #f8f9fa;
+}
+
+#data-table tbody tr:hover td {
+    background: #e9ecef;
+}
+
+#pagination {
+    flex-shrink: 0;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    flex-wrap: wrap;
+    border-top: 1px solid #e0e4e8;
+    background: white;
+    position: sticky;
+    bottom: 0;
+}
+
+#pagination button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#pagination button:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+#pagination button:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+#page-info {
+    font-size: 15px;
+    font-weight: 500;
+    color: #2c3e50;
+    white-space: nowrap;
+}
+
+#jump-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#jump-container label {
+    font-size: 14px;
+    color: #555;
+}
+
+#page-jump {
+    width: 70px;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+}
+
+#page-jump:focus {
+    outline: 2px solid #3498db;
+    border-color: transparent;
+}
+
+#go-btn {
+    background: #2c3e50;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+#go-btn:hover {
+    background: #1a252f;
+}
