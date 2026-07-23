@@ -23,16 +23,11 @@ import {
     setupResizeHandler
 } from './handlers/eventHandlers.js';
 
-export const API_BASE = 'http://localhost:2050';
-
-let columns: string[] = [];
-
 let $tableHead: JQuery<HTMLElement>;
 let $tableBody: JQuery<HTMLElement>;
 let $pageInfo: JQuery<HTMLElement>;
 let $prevBtn: JQuery<HTMLElement>;
 let $nextBtn: JQuery<HTMLElement>;
-let $loading: JQuery<HTMLElement>;
 let $pageJump: JQuery<HTMLInputElement>;
 let $goBtn: JQuery<HTMLElement>;
 
@@ -83,7 +78,6 @@ jQuery(async ($) => {
     $nextBtn = $('#next-btn');
     $pageJump = $('#page-jump') as JQuery<HTMLInputElement>;
     $goBtn = $('#go-btn');
-    $loading = $('#loading');
 
     setRenderingDependencies($tableHead, $tableBody, $pageInfo, $prevBtn, $nextBtn, $pageJump);
 
@@ -93,9 +87,8 @@ jQuery(async ($) => {
 			fetchTotalRecords(),
             fetchCurrentPageRecords(0, 0)
         ]);
-        columns = cols;
 
-        renderHeaders(columns);
+        renderHeaders(cols);
         renderBody(sampleData);
 
         let wrapper = document.querySelector('.table-wrapper') as HTMLElement;
